@@ -2,7 +2,7 @@ import  axiosInstance  from '@/axiosConfiguration/axios-configuration';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-
+import { Circles } from 'react-loader-spinner';
 interface login {
   email: string;
   password: string;
@@ -12,7 +12,8 @@ const LoginForm = () => {
   const [userdata, setUserData] = useState<login>({
   email: '',
   password: '',});
- const [ error,setError] = useState('')
+  const [error,setError] = useState<string[]| string>('')
+  const [loading,setLoading] = useState<boolean>(false)
 
 
  useEffect(() => {
@@ -24,23 +25,31 @@ const LoginForm = () => {
 }, []);
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true)
     if (userdata.email.trim().length === 0 || userdata.password.trim().length === 0) {
       setError('Please fill all fields');
       setTimeout(()=>{
         setError('')
       },4000)
+      setLoading(false)
       return
     }
     axiosInstance.post('/users/login', userdata)
       .then((response) => {
         localStorage.setItem('token', JSON.stringify(response.data)); 
+        setLoading(false)
         router.push('/movies')
       })      
-      .catch((error) => {        
-        setError('Something went wrong. Please try again.')
+      .catch((error) => {  
+        if(error?.response?.data?.message){
+          setError(error?.response?.data?.message)
+        }else{
+          setError('Something went wrong. Please try again.')
+        }      
         setTimeout(()=>{
           setError('')  
         },4000)
+        setLoading(false)
       });
   };
 
@@ -60,9 +69,17 @@ const LoginForm = () => {
                         <label className="block mb-2" htmlFor="password">Password</label>
                         <input className="w-full p-3 rounded bg-black text-white border border-yellow-300 focus:outline-none focus:ring-2 focus:ring-yellow-400" type="password" id="password" name="password" autoComplete="new-password" required onChange={(e:any)=>setUserData({...userdata,password:e.target.value})} />
                     </div>
-                    <button className="w-full py-3 bg-black text-yellow-500 rounded hover:bg-yellow-600 transition-colors" type="submit">Login</button>
+                    <button className="w-full py-3 bg-black text-yellow-500 rounded hover:bg-yellow-600 transition-colors flex items-center justify-center" type="submit">{loading?<Circles
+  height="30"
+  width="30"
+  color="#4fa94d"
+  ariaLabel="circles-loading"
+  wrapperStyle={{}}
+  wrapperClass=""
+  visible={true}
+  />:'Login'}</button>
                 </form>
-                <p className="mt-6 text-center">{error}</p>
+                <p className="mt-6 text-center text-red-500">{error}</p>
                 <p className="mt-6 text-center">
                     Dont have an account? <Link className="text-yellow-700 hover:underline" href="/signup">Sign up</Link>
                 </p>

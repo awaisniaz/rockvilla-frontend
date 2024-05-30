@@ -1,8 +1,9 @@
 import Link from "next/dist/client/link"
-
+import { ToastContainer} from 'react-toastify';
+  import 'react-toastify/dist/ReactToastify.css';
 export const HeaderMenu = ()=>{
   
-    return <header className="bg-black text-white p-4">
+    return<><ToastContainer/><header className="bg-black text-white p-4">
     <div className="container mx-auto flex justify-between items-center">
         <h1 className="text-2xl font-bold">Movie App</h1>
         <nav>
@@ -12,5 +13,5 @@ export const HeaderMenu = ()=>{
             </ul>
         </nav>
     </div>
-</header>
+</header></>
 }

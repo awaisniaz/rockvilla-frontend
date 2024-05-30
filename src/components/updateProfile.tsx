@@ -3,11 +3,14 @@ import { HeaderMenu } from './header';
 import { useRouter } from 'next/router';
 import axiosInstance from '@/axiosConfiguration/axios-configuration';
 import Select from 'react-select';
+import { toast } from 'react-toastify';
+import { Circles } from 'react-loader-spinner';
 const UpdateProfile = () => {
     const router =  useRouter()
     const [userData,setUserData] = useState<any>()
     const [updateRequest,setUpdateRequest] = useState<any>()
     const [categoriesOptions,setCategoriesOptions] = useState<any>([])
+    const [loading,setLoading] = useState<boolean>(false)
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -34,15 +37,20 @@ const UpdateProfile = () => {
       }
 
       const updateProfile = (token:string) => {
+        setLoading(true)
         axiosInstance.patch('/users/update-profile',updateRequest,{
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'multipart/form-data'
             }})
           .then((response:any) => {
+            toast.success("Your Profile Update Successfully !")
+            setLoading(false)
             getUserProfile(token)
           })
-          .catch((error:any) => {            
+          .catch((error:any) => { 
+            toast.error(error?.response?.data?.message ?? "Something went wrong! Please try again.");
+            setLoading(false)           
           });
       }
    const getCategories = (token:string)=>{
@@ -133,7 +141,15 @@ const UpdateProfile = () => {
                             setUserData({ ...userData, image: e.target.files?.[0] })
                         }} />
                     </div>
-                    <button className="w-full py-3 bg-black text-yellow-500 rounded hover:bg-yellow-600 transition-colors" type="submit">Update Profile</button>
+                    <button className="w-full py-3 bg-black text-yellow-500 rounded hover:bg-yellow-600 transition-colors flex items-center justify-center" type="submit">{loading?<Circles
+  height="30"
+  width="30"
+  color="#4fa94d"
+  ariaLabel="circles-loading"
+  wrapperStyle={{}}
+  wrapperClass=""
+  visible={true}
+  />:'Update Profile'}</button>
                 </form>
             </div>
         </div>
